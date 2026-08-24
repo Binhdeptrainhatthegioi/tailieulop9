@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌍 Trợ lý Địa lý Lớp 9</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span class="logo">🌍</span>
+        <h2>Địa lý 9</h2>
+        <button class="close-btn" id="closeSidebar" aria-label="Đóng sidebar">✕</button>
+      </div>
+
+      <div class="sidebar-body">
+        <label for="apiKeyInput">OpenAI API Key</label>
+        <div class="key-wrapper">
+          <input
+            id="apiKeyInput"
+            type="password"
+            placeholder="sk-..."
+            autocomplete="off"
+          />
+          <button id="toggleKey" aria-label="Hiện/ẩn key">👁</button>
+        </div>
+        <button class="btn-save" id="saveKey">Lưu key</button>
+        <p class="hint-link">
+          <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">
+            Lấy API Key tại đây ↗
+          </a>
+        </p>
+
+        <hr />
+
+        <p class="sidebar-info">
+          Ứng dụng dùng RAG (Retrieval-Augmented Generation) kết hợp tài liệu
+          Địa lý lớp 9 và GPT-4o-mini để trả lời câu hỏi của bạn.
+        </p>
+
+        <button class="btn-clear" id="clearChat">🗑 Xóa lịch sử chat</button>
+      </div>
+    </aside>
+
+    <!-- Overlay (mobile) -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Main -->
+    <div class="main">
+
+      <!-- Topbar -->
+      <header class="topbar">
+        <button class="menu-btn" id="menuBtn" aria-label="Mở menu">☰</button>
+        <div class="topbar-title">
+          <span>🌍</span>
+          <span>Trợ lý Địa lý Lớp 9</span>
+        </div>
+        <div class="status-dot" id="statusDot" title="Chưa có API Key"></div>
+      </header>
+
+      <!-- Chat -->
+      <main class="chat" id="chat">
+        <div class="welcome">
+          <div class="welcome-icon">🌏</div>
+          <h3>Xin chào!</h3>
+          <p>Hỏi tôi bất cứ điều gì về <strong>Địa lý lớp 9</strong> — địa lý tự nhiên, kinh tế, vùng miền Việt Nam và thế giới.</p>
+          <div class="suggestions">
+            <button class="chip" onclick="fillSuggestion(this)">Đặc điểm địa hình Việt Nam?</button>
+            <button class="chip" onclick="fillSuggestion(this)">Các vùng kinh tế trọng điểm?</button>
+            <button class="chip" onclick="fillSuggestion(this)">Khí hậu nhiệt đới gió mùa?</button>
+            <button class="chip" onclick="fillSuggestion(this)">Tài nguyên thiên nhiên nước ta?</button>
+          </div>
+        </div>
+      </main>
+
+      <!-- Input -->
+      <footer class="input-area">
+        <div class="input-box">
+          <textarea
+            id="userInput"
+            placeholder="Nhập câu hỏi về Địa lý..."
+            rows="1"
+            aria-label="Nhập câu hỏi"
+          ></textarea>
+          <button id="sendBtn" onclick="sendMessage()" aria-label="Gửi">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+            </svg>
+          </button>
+        </div>
+        <p class="input-hint">Enter để gửi &nbsp;·&nbsp; Shift+Enter để xuống dòng</p>
+      </footer>
+
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
