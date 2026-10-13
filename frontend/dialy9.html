@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌍 Trợ lý Địa lý Lớp 9</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span class="logo">🌍</span>
+        <h2>Địa lý 9</h2>
+        <button class="close-btn" id="closeSidebar">✕</button>
+      </div>
+      <div class="sidebar-body">
+        <p class="sidebar-info">
+          Trợ lý ảo Địa lý lớp 9 sử dụng Google Gemini AI.
+          Hỏi bất cứ điều gì về địa lý tự nhiên, kinh tế,
+          vùng miền Việt Nam và thế giới.
+        </p>
+        <hr />
+        <button class="btn-clear" id="clearChat">🗑 Xóa lịch sử chat</button>
+      </div>
+    </aside>
+
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Main -->
+    <div class="main">
+      <header class="topbar">
+        <button class="menu-btn" id="menuBtn" aria-label="Menu">☰</button>
+        <div class="topbar-title">🌍 Trợ lý Địa lý Lớp 9</div>
+        <div class="status-dot" id="statusDot"></div>
+      </header>
+
+      <main class="chat" id="chat">
+        <div class="welcome" id="welcome">
+          <div class="welcome-icon">🌏</div>
+          <h3>Xin chào!</h3>
+          <p>Hỏi tôi bất cứ điều gì về <strong>Địa lý lớp 9</strong>.</p>
+          <div class="suggestions">
+            <button class="chip" onclick="fillSuggestion(this)">Đặc điểm địa hình Việt Nam?</button>
+            <button class="chip" onclick="fillSuggestion(this)">Các vùng kinh tế trọng điểm?</button>
+            <button class="chip" onclick="fillSuggestion(this)">Khí hậu nhiệt đới gió mùa?</button>
+            <button class="chip" onclick="fillSuggestion(this)">Tài nguyên thiên nhiên nước ta?</button>
+          </div>
+        </div>
+      </main>
+
+      <footer class="input-area">
+        <div class="input-box">
+          <textarea id="userInput" placeholder="Nhập câu hỏi về Địa lý..." rows="1"></textarea>
+          <button id="sendBtn" onclick="sendMessage()" aria-label="Gửi">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+            </svg>
+          </button>
+        </div>
+        <p class="input-hint">Enter gửi · Shift+Enter xuống dòng</p>
+      </footer>
+    </div>
+
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

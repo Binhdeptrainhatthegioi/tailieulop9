@@ -1,126 +1,67 @@
-// =====================================================
-// ⚠️  Sau khi deploy backend lên Render, thay URL này
-// =====================================================
-const BACKEND_URL = "https://YOUR-APP.onrender.com";
-// =====================================================
+// Gọi qua Netlify Function - key được giấu trên server
+const API_ENDPOINT = "/.netlify/functions/ask";
 
-// ---------- DOM refs ----------
-const chat        = document.getElementById("chat");
-const userInput   = document.getElementById("userInput");
-const sendBtn     = document.getElementById("sendBtn");
-const apiKeyInput = document.getElementById("apiKeyInput");
-const saveKeyBtn  = document.getElementById("saveKey");
-const clearBtn    = document.getElementById("clearChat");
-const statusDot   = document.getElementById("statusDot");
-const menuBtn     = document.getElementById("menuBtn");
-const sidebar     = document.getElementById("sidebar");
-const overlay     = document.getElementById("overlay");
-const closeSidebar= document.getElementById("closeSidebar");
-const toggleKey   = document.getElementById("toggleKey");
+// DOM
+const chat    = document.getElementById("chat");
+const input   = document.getElementById("userInput");
+const sendBtn = document.getElementById("sendBtn");
+const clearBtn= document.getElementById("clearChat");
+const menuBtn = document.getElementById("menuBtn");
+const sidebar = document.getElementById("sidebar");
+const overlay = document.getElementById("overlay");
+const closeBtn= document.getElementById("closeSidebar");
+const statusDot = document.getElementById("statusDot");
 
-// ---------- State ----------
-let messages = [];   // { role: "user"|"bot", text }
+// Lịch sử gửi lên Gemini (không bao gồm tin nhắn hiện tại)
+let history = [];
 
-// ---------- Init ----------
+// ── Init ──
 (function init() {
-  // Khôi phục API key đã lưu
-  const saved = localStorage.getItem("openai_api_key");
-  if (saved) {
-    apiKeyInput.value = saved;
-    setStatus("ready");
-  }
+  setStatus("ready");
 
-  // Khôi phục lịch sử chat
-  const savedMsgs = localStorage.getItem("chat_history");
-  if (savedMsgs) {
+  const saved = localStorage.getItem("chat_history");
+  if (saved) {
     try {
-      messages = JSON.parse(savedMsgs);
-      if (messages.length) {
-        removeWelcome();
-        messages.forEach(m => renderMessage(m.text, m.role, false));
+      const msgs = JSON.parse(saved);
+      if (msgs.length) {
+        document.getElementById("welcome")?.remove();
+        msgs.forEach(m => renderBubble(m.text, m.role, false));
+        msgs.forEach(m => {
+          history.push({
+            role: m.role === "user" ? "user" : "model",
+            parts: [{ text: m.text }],
+          });
+        });
         scrollBottom();
       }
-    } catch { messages = []; }
+    } catch { /* ignore */ }
   }
 })();
 
-// ---------- Sidebar ----------
+// ── Sidebar ──
 menuBtn.addEventListener("click", () => {
   sidebar.classList.add("open");
   overlay.classList.add("show");
 });
 
-function closeSidebarFn() {
+function closeSidebar() {
   sidebar.classList.remove("open");
   overlay.classList.remove("show");
 }
 
-closeSidebar.addEventListener("click", closeSidebarFn);
-overlay.addEventListener("click", closeSidebarFn);
+closeBtn.addEventListener("click", closeSidebar);
+overlay.addEventListener("click", closeSidebar);
 
-// ---------- API Key ----------
-saveKeyBtn.addEventListener("click", () => {
-  const key = apiKeyInput.value.trim();
-  if (!key) { alert("Vui lòng nhập API Key."); return; }
-  localStorage.setItem("openai_api_key", key);
-  setStatus("ready");
-  saveKeyBtn.textContent = "✅ Đã lưu!";
-  setTimeout(() => saveKeyBtn.textContent = "Lưu key", 2000);
-  closeSidebarFn();
-});
-
-toggleKey.addEventListener("click", () => {
-  apiKeyInput.type = apiKeyInput.type === "password" ? "text" : "password";
-});
-
-function setStatus(state) {
-  statusDot.className = "status-dot " + state;
-  const labels = { ready: "Sẵn sàng", loading: "Đang xử lý...", error: "Lỗi", "": "Chưa có API Key" };
-  statusDot.title = labels[state] || "";
-}
-
-// ---------- Clear chat ----------
+// ── Clear ──
 clearBtn.addEventListener("click", () => {
   if (!confirm("Xóa toàn bộ lịch sử chat?")) return;
-  messages = [];
+  history = [];
   localStorage.removeItem("chat_history");
-  chat.innerHTML = "";
-  renderWelcome();
-  closeSidebarFn();
-});
-
-// ---------- Suggestions ----------
-function fillSuggestion(el) {
-  userInput.value = el.textContent;
-  userInput.dispatchEvent(new Event("input"));
-  userInput.focus();
-}
-
-// ---------- Textarea auto-resize ----------
-userInput.addEventListener("input", () => {
-  userInput.style.height = "auto";
-  userInput.style.height = Math.min(userInput.scrollHeight, 120) + "px";
-});
-
-userInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    sendMessage();
-  }
-});
-
-// ---------- Render helpers ----------
-function removeWelcome() {
-  const w = chat.querySelector(".welcome");
-  if (w) w.remove();
-}
-
-function renderWelcome() {
   chat.innerHTML = `
-    <div class="welcome">
+    <div class="welcome" id="welcome">
       <div class="welcome-icon">🌏</div>
       <h3>Xin chào!</h3>
-      <p>Hỏi tôi bất cứ điều gì về <strong>Địa lý lớp 9</strong> — địa lý tự nhiên, kinh tế, vùng miền Việt Nam và thế giới.</p>
+      <p>Hỏi tôi bất cứ điều gì về <strong>Địa lý lớp 9</strong>.</p>
       <div class="suggestions">
         <button class="chip" onclick="fillSuggestion(this)">Đặc điểm địa hình Việt Nam?</button>
         <button class="chip" onclick="fillSuggestion(this)">Các vùng kinh tế trọng điểm?</button>
@@ -128,121 +69,124 @@ function renderWelcome() {
         <button class="chip" onclick="fillSuggestion(this)">Tài nguyên thiên nhiên nước ta?</button>
       </div>
     </div>`;
+  closeSidebar();
+});
+
+// ── Status ──
+function setStatus(s) {
+  statusDot.className = "status-dot " + s;
+  statusDot.title = { ready: "Sẵn sàng", loading: "Đang xử lý...", error: "Lỗi" }[s] || "";
 }
 
-function renderMessage(text, role, animate = true) {
+// ── Suggestions ──
+function fillSuggestion(el) {
+  input.value = el.textContent;
+  input.dispatchEvent(new Event("input"));
+  input.focus();
+}
+
+// ── Textarea resize ──
+input.addEventListener("input", () => {
+  input.style.height = "auto";
+  input.style.height = Math.min(input.scrollHeight, 120) + "px";
+});
+
+input.addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+
+// ── Render helpers ──
+function renderBubble(text, role, animate = true) {
   const msg = document.createElement("div");
   msg.classList.add("message", role === "user" ? "user-message" : "bot-message");
   if (!animate) msg.style.animation = "none";
 
-  const avatar = document.createElement("div");
-  avatar.classList.add("avatar");
-  avatar.textContent = role === "user" ? "🧑" : "🤖";
+  const av = document.createElement("div");
+  av.classList.add("avatar");
+  av.textContent = role === "user" ? "🧑" : "🤖";
 
   const bubble = document.createElement("div");
   bubble.classList.add("bubble");
   bubble.textContent = text;
 
-  msg.appendChild(avatar);
+  msg.appendChild(av);
   msg.appendChild(bubble);
   chat.appendChild(msg);
   return bubble;
 }
 
-function renderTyping() {
+function showTyping() {
   const msg = document.createElement("div");
   msg.classList.add("message", "bot-message");
   msg.id = "typing";
-
-  const avatar = document.createElement("div");
-  avatar.classList.add("avatar");
-  avatar.textContent = "🤖";
-
-  const bubble = document.createElement("div");
-  bubble.classList.add("typing-bubble");
-  bubble.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
-
-  msg.appendChild(avatar);
-  msg.appendChild(bubble);
+  msg.innerHTML = `<div class="avatar">🤖</div>
+    <div class="typing-bubble">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    </div>`;
   chat.appendChild(msg);
   scrollBottom();
 }
 
-function removeTyping() {
-  const t = document.getElementById("typing");
-  if (t) t.remove();
+function hideTyping() { document.getElementById("typing")?.remove(); }
+function scrollBottom() { chat.scrollTop = chat.scrollHeight; }
+
+function saveToStorage(role, text) {
+  const all = JSON.parse(localStorage.getItem("chat_history") || "[]");
+  all.push({ role, text });
+  localStorage.setItem("chat_history", JSON.stringify(all));
 }
 
-function scrollBottom() {
-  chat.scrollTop = chat.scrollHeight;
-}
-
-function saveHistory() {
-  localStorage.setItem("chat_history", JSON.stringify(messages));
-}
-
-// ---------- Send ----------
+// ── Send ──
 async function sendMessage() {
-  const question = userInput.value.trim();
+  const question = input.value.trim();
   if (!question) return;
 
-  const apiKey = localStorage.getItem("openai_api_key") || apiKeyInput.value.trim();
-  if (!apiKey) {
-    alert("Vui lòng nhập và lưu OpenAI API Key ở menu bên trái trước.");
-    return;
-  }
-
-  // Clear input
-  userInput.value = "";
-  userInput.style.height = "auto";
+  input.value = "";
+  input.style.height = "auto";
   sendBtn.disabled = true;
   setStatus("loading");
 
-  removeWelcome();
-
-  // Hiện tin user
-  renderMessage(question, "user");
-  messages.push({ role: "user", text: question });
-  saveHistory();
+  document.getElementById("welcome")?.remove();
+  renderBubble(question, "user");
+  saveToStorage("user", question);
   scrollBottom();
 
-  renderTyping();
+  showTyping();
 
   try {
-    const res = await fetch(`${BACKEND_URL}/ask`, {
+    const res = await fetch(API_ENDPOINT, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-API-Key": apiKey,
-      },
-      body: JSON.stringify({ question }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question, history }),
     });
 
-    removeTyping();
+    hideTyping();
+
+    const data = await res.json();
 
     if (!res.ok) {
-      const err = await res.json().catch(() => ({ detail: res.statusText }));
-      const bubble = renderMessage("", "bot");
-      bubble.classList.add("error");
-      bubble.textContent = `⚠️ ${err.detail || "Lỗi không xác định"}`;
+      const b = renderBubble("", "bot");
+      b.classList.add("error");
+      b.textContent = "⚠️ " + (data.error || `Lỗi ${res.status}`);
       setStatus("error");
     } else {
-      const data = await res.json();
-      renderMessage(data.answer, "bot");
-      messages.push({ role: "bot", text: data.answer });
-      saveHistory();
+      renderBubble(data.answer, "bot");
+      saveToStorage("bot", data.answer);
+      // Cập nhật history cho lượt tiếp theo
+      history.push({ role: "user",  parts: [{ text: question }] });
+      history.push({ role: "model", parts: [{ text: data.answer }] });
       setStatus("ready");
     }
 
   } catch {
-    removeTyping();
-    const bubble = renderMessage("", "bot");
-    bubble.classList.add("error");
-    bubble.textContent = "⚠️ Không thể kết nối đến server. Kiểm tra lại đường truyền hoặc thử lại sau.";
+    hideTyping();
+    const b = renderBubble("", "bot");
+    b.classList.add("error");
+    b.textContent = "⚠️ Không thể kết nối. Thử lại sau.";
     setStatus("error");
   } finally {
     sendBtn.disabled = false;
     scrollBottom();
-    userInput.focus();
+    input.focus();
   }
 }

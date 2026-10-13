@@ -3,101 +3,669 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🌍 Trợ lý Địa lý Lớp 9</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>💀 Hacked by Binh — Code Share</title>
+  <meta name="description" content="Chia sẻ code Python tạo hiệu ứng pop-up Hacked by Binh — chỉ dùng thư viện chuẩn Python." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: #13131c;
+      --surface2: #1a1a28;
+      --border: #2a2a40;
+      --red: #ff2244;
+      --red-glow: rgba(255,34,68,.35);
+      --red-dk: #cc0022;
+      --accent: #ff6680;
+      --text: #eeeef5;
+      --muted: #7777aa;
+      --code-bg: #0d0d17;
+      --green: #00ff88;
+      --yellow: #ffd700;
+      --r: 14px;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(255,34,68,.07) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 80% 90%, rgba(100,50,255,.05) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        transparent 0px, transparent 2px,
+        rgba(255,255,255,.015) 2px, rgba(255,255,255,.015) 4px
+      );
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    header {
+      position: relative;
+      z-index: 10;
+      padding: 36px 24px 0;
+      text-align: center;
+    }
+
+    .skull {
+      font-size: 3.5rem;
+      animation: skullPulse 2s ease-in-out infinite;
+      display: inline-block;
+      filter: drop-shadow(0 0 12px var(--red));
+    }
+    @keyframes skullPulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 12px var(--red)); }
+      50% { transform: scale(1.08); filter: drop-shadow(0 0 24px var(--red)); }
+    }
+
+    h1 {
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -.02em;
+      margin-top: 10px;
+      background: linear-gradient(135deg, #ff2244, #ff6680, #ff2244);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 3s linear infinite;
+    }
+    @keyframes shimmer { to { background-position: 200% center; } }
+
+    .subtitle {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: .95rem;
+    }
+    .subtitle span { color: var(--green); font-weight: 600; }
+
+    .badges {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 12px;
+      border-radius: 99px;
+      font-size: .75rem;
+      font-weight: 600;
+      border: 1px solid;
+    }
+    .badge-red   { background: rgba(255,34,68,.1);  border-color: rgba(255,34,68,.4);  color: #ff6680; }
+    .badge-green { background: rgba(0,255,136,.08); border-color: rgba(0,255,136,.35); color: var(--green); }
+    .badge-gold  { background: rgba(255,215,0,.08); border-color: rgba(255,215,0,.35); color: var(--yellow); }
+
+    .container {
+      position: relative;
+      z-index: 10;
+      max-width: 1100px;
+      margin: 36px auto 60px;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+      box-shadow: 0 4px 32px rgba(0,0,0,.4);
+      transition: box-shadow .3s;
+    }
+    .panel:hover {
+      box-shadow: 0 8px 48px rgba(255,34,68,.1), 0 4px 32px rgba(0,0,0,.5);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: .95rem;
+    }
+    .dot-row { display: flex; gap: 5px; }
+    .dot-row span { width: 11px; height: 11px; border-radius: 50%; display: block; }
+    .dot-red2   { background: #ff5f57; }
+    .dot-yellow2{ background: #ffbd2e; }
+    .dot-green2 { background: #28ca41; }
+
+    .copy-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-family: 'Outfit', sans-serif;
+      font-size: .82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .copy-btn:hover { border-color: var(--red); color: var(--accent); background: rgba(255,34,68,.08); }
+    .copy-btn.copied { border-color: var(--green); color: var(--green); background: rgba(0,255,136,.08); }
+
+    .code-scroll {
+      overflow-x: auto;
+      overflow-y: auto;
+      max-height: 520px;
+    }
+    .code-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+    .code-scroll::-webkit-scrollbar-track { background: var(--code-bg); }
+    .code-scroll::-webkit-scrollbar-thumb { background: #333355; border-radius: 4px; }
+
+    pre {
+      background: var(--code-bg);
+      padding: 20px 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .85rem;
+      line-height: 1.75;
+      min-width: 100%;
+      width: max-content;
+    }
+
+    .kw { color: #ff79c6; }
+    .fn { color: #50fa7b; }
+    .cl { color: #8be9fd; }
+    .st { color: #f1fa8c; }
+    .cm { color: #6272a4; font-style: italic; }
+    .nm { color: #bd93f9; }
+    .op { color: #ff79c6; }
+    .bi { color: #ffb86c; }
+
+    .cmd-body { padding: 24px; }
+
+    .step {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+    .step:last-child { margin-bottom: 0; }
+
+    .step-num {
+      flex-shrink: 0;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--red), var(--red-dk));
+      color: #fff;
+      font-weight: 800;
+      font-size: .8rem;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 10px var(--red-glow);
+    }
+    .step-num-tip {
+      flex-shrink: 0;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: rgba(255,215,0,.15);
+      border: 1px solid rgba(255,215,0,.4);
+      font-size: .9rem;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .step-content { flex: 1; }
+    .step-label { font-weight: 700; font-size: .9rem; margin-bottom: 8px; color: var(--text); }
+    .step-desc { font-size: .84rem; color: var(--muted); line-height: 1.6; margin-bottom: 10px; }
+
+    .cmd-box {
+      display: flex;
+      align-items: center;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: border-color .2s;
+      margin-bottom: 8px;
+    }
+    .cmd-box:last-child { margin-bottom: 0; }
+    .cmd-box:hover { border-color: #444466; }
+
+    .cmd-prompt {
+      padding: 12px 14px;
+      color: var(--green);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .88rem;
+      font-weight: 600;
+      background: rgba(0,255,136,.06);
+      border-right: 1px solid var(--border);
+      user-select: none;
+    }
+
+    .cmd-text {
+      flex: 1;
+      padding: 12px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .88rem;
+      color: #e2e2f0;
+    }
+
+    .cmd-copy {
+      padding: 12px 14px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: color .2s;
+      font-size: 1rem;
+    }
+    .cmd-copy:hover { color: var(--accent); }
+    .cmd-copy.ok    { color: var(--green); }
+
+    .warn-box {
+      display: flex;
+      gap: 12px;
+      padding: 14px 18px;
+      background: rgba(255,215,0,.05);
+      border: 1px solid rgba(255,215,0,.25);
+      border-radius: 10px;
+      font-size: .84rem;
+      color: #ccaa00;
+      line-height: 1.6;
+      margin-top: 20px;
+    }
+    .warn-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+      gap: 12px;
+      padding: 18px;
+      background: var(--surface2);
+      border-top: 1px solid var(--border);
+    }
+    .info-card {
+      padding: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      text-align: center;
+    }
+    .info-card .ic-icon  { font-size: 1.4rem; margin-bottom: 6px; }
+    .info-card .ic-label { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+    .info-card .ic-value { font-size: .9rem; font-weight: 700; margin-top: 2px; }
+    .ic-value.red   { color: var(--accent); }
+    .ic-value.green { color: var(--green); }
+    .ic-value.gold  { color: var(--yellow); }
+
+    .divider {
+      display: flex; align-items: center; gap: 14px;
+      color: var(--muted); font-size: .78rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .08em;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    footer {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 20px;
+      color: var(--muted);
+      font-size: .8rem;
+      border-top: 1px solid var(--border);
+    }
+    footer strong { color: var(--accent); }
+
+    .glitch { position: relative; display: inline-block; }
+    .glitch::before, .glitch::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0; left: 0;
+      background: linear-gradient(135deg, #ff2244, #ff6680, #ff2244);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .glitch::before { animation: glitch1 3s infinite; clip-path: polygon(0 0,100% 0,100% 35%,0 35%); }
+    .glitch::after  { animation: glitch2 3s infinite; clip-path: polygon(0 65%,100% 65%,100% 100%,0 100%); }
+    @keyframes glitch1 {
+      0%,90%,100% { transform: none; }
+      92% { transform: translate(-2px, 0); }
+      94% { transform: translate(2px, 0); }
+      96% { transform: translate(-1px, 0); }
+    }
+    @keyframes glitch2 {
+      0%,90%,100% { transform: none; }
+      91% { transform: translate(2px, 0); }
+      93% { transform: translate(-2px, 0); }
+      95% { transform: translate(1px, 0); }
+    }
+
+    @media (max-width: 640px) {
+      pre { font-size: .76rem; }
+      .cmd-text { font-size: .78rem; }
+    }
+  </style>
 </head>
 <body>
-  <div class="app">
 
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-header">
-        <span class="logo">🌍</span>
-        <h2>Địa lý 9</h2>
-        <button class="close-btn" id="closeSidebar" aria-label="Đóng sidebar">✕</button>
+  <header>
+    <div class="skull">&#128128;</div>
+    <h1 class="glitch" data-text="Hacked by Binh">Hacked by Binh</h1>
+    <p class="subtitle">Pop-up storm bằng Python &mdash; <span>không cần cài thư viện</span></p>
+    <div class="badges">
+      <span class="badge badge-red">🐍 Python 3.x</span>
+      <span class="badge badge-green">&#10003; Chỉ dùng thư viện chuẩn</span>
+      <span class="badge badge-gold">&#9889; tkinter + threading</span>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- CODE PANEL -->
+    <div class="panel" id="code-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <div class="dot-row">
+            <span class="dot-red2"></span>
+            <span class="dot-yellow2"></span>
+            <span class="dot-green2"></span>
+          </div>
+          &#128196;&nbsp; hacked.py
+        </div>
+        <button class="copy-btn" id="copyCode" onclick="copyCode()">
+          &#128203; <span id="copyCodeLabel">Sao chép code</span>
+        </button>
       </div>
 
-      <div class="sidebar-body">
-        <label for="apiKeyInput">OpenAI API Key</label>
-        <div class="key-wrapper">
-          <input
-            id="apiKeyInput"
-            type="password"
-            placeholder="sk-..."
-            autocomplete="off"
-          />
-          <button id="toggleKey" aria-label="Hiện/ẩn key">👁</button>
-        </div>
-        <button class="btn-save" id="saveKey">Lưu key</button>
-        <p class="hint-link">
-          <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">
-            Lấy API Key tại đây ↗
-          </a>
-        </p>
+      <div class="code-scroll">
+        <pre id="code-content"><span class="kw">import</span> tkinter <span class="kw">as</span> tk
+<span class="kw">import</span> threading
+<span class="kw">import</span> random
+<span class="kw">import</span> os
+<span class="kw">import</span> time
 
-        <hr />
 
-        <p class="sidebar-info">
-          Ứng dụng dùng RAG (Retrieval-Augmented Generation) kết hợp tài liệu
-          Địa lý lớp 9 và GPT-4o-mini để trả lời câu hỏi của bạn.
-        </p>
+<span class="cm"># ── Trạng thái toàn cục ──────────────────────────────────────</span>
+is_running = <span class="bi">False</span>
+windows    = []
+main_root  = <span class="bi">None</span>
 
-        <button class="btn-clear" id="clearChat">🗑 Xóa lịch sử chat</button>
+
+<span class="kw">def</span> <span class="fn">close_all</span>():
+    <span class="st">"""Tắt toàn bộ chương trình."""</span>
+    <span class="kw">global</span> is_running
+    is_running = <span class="bi">False</span>
+    <span class="kw">for</span> w <span class="kw">in</span> windows:
+        <span class="kw">try</span>: w.destroy()
+        <span class="kw">except</span>: <span class="kw">pass</span>
+    os._exit(<span class="nm">0</span>)
+
+
+<span class="kw">def</span> <span class="fn">auto_close_window</span>(win):
+    <span class="st">"""Đóng một cửa sổ và xóa khỏi danh sách."""</span>
+    <span class="kw">try</span>:
+        <span class="kw">if</span> win <span class="kw">in</span> windows:
+            windows.remove(win)
+        win.destroy()
+    <span class="kw">except</span>: <span class="kw">pass</span>
+
+
+<span class="kw">def</span> <span class="fn">spawn_window</span>():
+    <span class="st">"""Tạo một cửa sổ pop-up mới và lên lịch cái tiếp theo."""</span>
+    <span class="kw">if not</span> is_running:
+        <span class="kw">return</span>
+
+    win = tk.<span class="cl">Toplevel</span>(main_root)
+    win.overrideredirect(<span class="bi">True</span>)   <span class="cm"># Ẩn thanh tiêu đề hệ thống</span>
+
+    w, h = <span class="nm">550</span>, <span class="nm">250</span>
+    sw   = win.winfo_screenwidth()
+    sh   = win.winfo_screenheight()
+    x    = random.randint(<span class="op">-</span><span class="nm">100</span>, sw <span class="op">-</span> <span class="nm">100</span>)
+    y    = random.randint(<span class="op">-</span><span class="nm">100</span>, sh <span class="op">-</span> <span class="nm">100</span>)
+
+    win.geometry(<span class="bi">f</span><span class="st">"{w}x{h}+{x}+{y}"</span>)
+    win.attributes(<span class="st">'-topmost'</span>, <span class="bi">True</span>)
+    win.configure(bg=<span class="st">'black'</span>)
+
+    <span class="cm"># Thanh tiêu đề giả màu tối</span>
+    title_bar = tk.<span class="cl">Frame</span>(win, bg=<span class="st">"#222222"</span>, relief=<span class="st">"flat"</span>, bd=<span class="nm">0</span>)
+    title_bar.pack(expand=<span class="bi">False</span>, fill=<span class="st">"x"</span>, side=<span class="st">"top"</span>)
+
+    tk.<span class="cl">Label</span>(
+        title_bar, text=<span class="st">"Tsbinh"</span>,
+        bg=<span class="st">"#222222"</span>, fg=<span class="st">"white"</span>,
+        font=(<span class="st">"Arial"</span>, <span class="nm">10</span>)
+    ).pack(side=<span class="st">"left"</span>, padx=<span class="nm">10</span>, pady=<span class="nm">2</span>)
+
+    <span class="cm"># Nội dung chính</span>
+    tk.<span class="cl">Label</span>(
+        win, text=<span class="st">"Hacked by Binh"</span>,
+        font=(<span class="st">"Arial"</span>, <span class="nm">50</span>, <span class="st">"bold"</span>),
+        bg=<span class="st">'black'</span>, fg=<span class="st">'red'</span>
+    ).pack(expand=<span class="bi">True</span>)
+
+    windows.append(win)
+
+    <span class="cm"># Tự đóng sau 2.5 giây</span>
+    win.after(<span class="nm">2500</span>, <span class="kw">lambda</span>: auto_close_window(win))
+
+    <span class="cm"># Kích hoạt cửa sổ tiếp theo sau 40 ms</span>
+    <span class="kw">if</span> is_running:
+        main_root.after(<span class="nm">40</span>, spawn_window)
+
+
+<span class="kw">def</span> <span class="fn">wait_for_stop_key</span>():
+    <span class="st">"""Luồng nền: nhấn Enter trong terminal để TẮT chương trình."""</span>
+    <span class="bi">input</span>()   <span class="cm"># Chặn đến khi người dùng nhấn Enter</span>
+    close_all()
+
+
+<span class="kw">if</span> __name__ <span class="op">==</span> <span class="st">"__main__"</span>:
+    <span class="bi">print</span>(<span class="st">"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"</span>)
+    <span class="bi">print</span>(<span class="st">"  💀  Hacked by Binh — Pop-up Storm"</span>)
+    <span class="bi">print</span>(<span class="st">"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"</span>)
+    <span class="bi">print</span>(<span class="st">"► Nhấn ENTER để BẮT ĐẦU pop-up liên tục..."</span>)
+    <span class="bi">input</span>()   <span class="cm"># Chờ người dùng nhấn Enter lần 1</span>
+
+    <span class="bi">print</span>(<span class="st">"► Đang chạy! Nhấn ENTER lần nữa để DỪNG."</span>)
+
+    is_running = <span class="bi">True</span>
+
+    <span class="cm"># Luồng lắng nghe phím Enter để dừng</span>
+    stop_thread = threading.<span class="cl">Thread</span>(target=wait_for_stop_key, daemon=<span class="bi">True</span>)
+    stop_thread.start()
+
+    <span class="cm"># Khởi tạo cửa sổ gốc ẩn</span>
+    main_root = tk.<span class="cl">Tk</span>()
+    main_root.withdraw()
+
+    <span class="cm"># Bắt đầu chuỗi pop-up</span>
+    spawn_window()
+
+    <span class="cm"># Vòng lặp giao diện</span>
+    main_root.mainloop()
+</pre>
       </div>
-    </aside>
 
-    <!-- Overlay (mobile) -->
-    <div class="overlay" id="overlay"></div>
-
-    <!-- Main -->
-    <div class="main">
-
-      <!-- Topbar -->
-      <header class="topbar">
-        <button class="menu-btn" id="menuBtn" aria-label="Mở menu">☰</button>
-        <div class="topbar-title">
-          <span>🌍</span>
-          <span>Trợ lý Địa lý Lớp 9</span>
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="ic-icon">🐍</div>
+          <div class="ic-label">Ngôn ngữ</div>
+          <div class="ic-value green">Python 3.x</div>
         </div>
-        <div class="status-dot" id="statusDot" title="Chưa có API Key"></div>
-      </header>
+        <div class="info-card">
+          <div class="ic-icon">📦</div>
+          <div class="ic-label">Thư viện ngoài</div>
+          <div class="ic-value green">Không cần</div>
+        </div>
+        <div class="info-card">
+          <div class="ic-icon">🎮</div>
+          <div class="ic-label">Điều khiển</div>
+          <div class="ic-value gold">Phím ENTER</div>
+        </div>
+        <div class="info-card">
+          <div class="ic-icon">⚡</div>
+          <div class="ic-label">Tốc độ pop-up</div>
+          <div class="ic-value red">40 ms / cái</div>
+        </div>
+        <div class="info-card">
+          <div class="ic-icon">⏱️</div>
+          <div class="ic-label">Thời gian tồn tại</div>
+          <div class="ic-value red">2.5 giây</div>
+        </div>
+        <div class="info-card">
+          <div class="ic-icon">💀</div>
+          <div class="ic-label">Tác giả</div>
+          <div class="ic-value red">Binh</div>
+        </div>
+      </div>
+    </div>
 
-      <!-- Chat -->
-      <main class="chat" id="chat">
-        <div class="welcome">
-          <div class="welcome-icon">🌏</div>
-          <h3>Xin chào!</h3>
-          <p>Hỏi tôi bất cứ điều gì về <strong>Địa lý lớp 9</strong> — địa lý tự nhiên, kinh tế, vùng miền Việt Nam và thế giới.</p>
-          <div class="suggestions">
-            <button class="chip" onclick="fillSuggestion(this)">Đặc điểm địa hình Việt Nam?</button>
-            <button class="chip" onclick="fillSuggestion(this)">Các vùng kinh tế trọng điểm?</button>
-            <button class="chip" onclick="fillSuggestion(this)">Khí hậu nhiệt đới gió mùa?</button>
-            <button class="chip" onclick="fillSuggestion(this)">Tài nguyên thiên nhiên nước ta?</button>
+    <div class="divider">Hướng dẫn chạy</div>
+
+    <!-- COMMAND PANEL -->
+    <div class="panel" id="cmd-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <div class="dot-row">
+            <span class="dot-red2"></span>
+            <span class="dot-yellow2"></span>
+            <span class="dot-green2"></span>
+          </div>
+          &#128187;&nbsp; Terminal — Lệnh chạy
+        </div>
+        <span class="badge badge-green">&#10003; Không cần pip install</span>
+      </div>
+
+      <div class="cmd-body">
+
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <div class="step-label">Lưu file code</div>
+            <div class="step-desc">Sao chép code bên trên, lưu thành file <code style="color:var(--accent);background:rgba(255,102,128,.1);padding:1px 6px;border-radius:4px;">hacked.py</code> ở bất kỳ đâu trên máy.</div>
           </div>
         </div>
-      </main>
 
-      <!-- Input -->
-      <footer class="input-area">
-        <div class="input-box">
-          <textarea
-            id="userInput"
-            placeholder="Nhập câu hỏi về Địa lý..."
-            rows="1"
-            aria-label="Nhập câu hỏi"
-          ></textarea>
-          <button id="sendBtn" onclick="sendMessage()" aria-label="Gửi">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-            </svg>
-          </button>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <div class="step-label">Chạy bằng Python</div>
+            <div class="step-desc">Mở terminal (CMD / PowerShell / Terminal), cd vào thư mục chứa file và chạy:</div>
+            <div class="cmd-box">
+              <span class="cmd-prompt">$</span>
+              <span class="cmd-text" id="cmd1">python hacked.py</span>
+              <button class="cmd-copy" id="copyCmd1" onclick="copyCmd('cmd1','copyCmd1')" title="Sao chép lệnh">📋</button>
+            </div>
+          </div>
         </div>
-        <p class="input-hint">Enter để gửi &nbsp;·&nbsp; Shift+Enter để xuống dòng</p>
-      </footer>
 
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <div class="step-label">Điều khiển bằng phím ENTER</div>
+            <div class="step-desc">Chương trình chạy qua terminal — <strong>không cần cài keyboard library</strong>:</div>
+            <div class="cmd-box">
+              <span class="cmd-prompt" style="color:#ffd700;background:rgba(255,215,0,.06);">↵</span>
+              <span class="cmd-text"><strong>ENTER lần 1</strong> &mdash; Bắt đầu bắn pop-up liên tục</span>
+            </div>
+            <div class="cmd-box">
+              <span class="cmd-prompt" style="color:#ff6680;background:rgba(255,102,128,.06);">✕</span>
+              <span class="cmd-text"><strong>ENTER lần 2</strong> &mdash; Dừng và đóng tất cả cửa sổ</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num-tip">💡</div>
+          <div class="step-content">
+            <div class="step-label">Lệnh thay thế (macOS / Linux)</div>
+            <div class="step-desc">Nếu <code style="color:var(--accent);">python</code> không nhận, dùng:</div>
+            <div class="cmd-box">
+              <span class="cmd-prompt">$</span>
+              <span class="cmd-text" id="cmd2">python3 hacked.py</span>
+              <button class="cmd-copy" id="copyCmd2" onclick="copyCmd('cmd2','copyCmd2')" title="Sao chép lệnh">📋</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="warn-box">
+          <span class="warn-icon">⚠️</span>
+          <div>
+            <strong>Lưu ý:</strong> Code này tạo ra hàng loạt cửa sổ pop-up phủ kín màn hình. Chỉ chạy trên máy <strong>của chính bạn</strong> hoặc khi được phép — dùng để đùa vui với bạn bè, không dùng để gây hại người khác!
+          </div>
+        </div>
+
+      </div>
     </div>
+
   </div>
 
-  <script src="app.js"></script>
+  <footer>
+    Made with &#128128; by <strong>Binh</strong> &nbsp;&middot;&nbsp; Python stdlib only &nbsp;&middot;&nbsp; No pip needed
+  </footer>
+
+  <script>
+    function getPlainCode() {
+      return document.getElementById('code-content').innerText;
+    }
+
+    function copyCode() {
+      navigator.clipboard.writeText(getPlainCode()).then(function() {
+        var btn   = document.getElementById('copyCode');
+        var label = document.getElementById('copyCodeLabel');
+        btn.classList.add('copied');
+        label.textContent = 'Da sao chep!';
+        setTimeout(function() {
+          btn.classList.remove('copied');
+          label.textContent = 'Sao chep code';
+        }, 2200);
+      });
+    }
+
+    function copyCmd(textId, btnId) {
+      var text = document.getElementById(textId).innerText;
+      navigator.clipboard.writeText(text).then(function() {
+        var btn = document.getElementById(btnId);
+        btn.classList.add('ok');
+        btn.textContent = 'OK';
+        setTimeout(function() {
+          btn.classList.remove('ok');
+          btn.textContent = 'Copy';
+        }, 2000);
+      });
+    }
+  </script>
 </body>
 </html>
