@@ -1,12 +1,14 @@
 [build]
-  # Chỉ publish thư mục frontend - không cài Python gì cả
   publish = "frontend"
-
-# Không có build command vì là HTML/CSS/JS thuần
+  functions = "netlify/functions"
 
 [[headers]]
   for = "/*"
   [headers.values]
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[redirects]]
+  from = "/"
+  to   = "/hacked.html"
+  status = 200
